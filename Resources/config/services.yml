@@ -1,0 +1,14 @@
+services:
+    #cas.security.authentication.provider:
+    #    class: L3\CasBundle\Security\CasProvider
+    #    arguments: ['', '']
+    #    public: false
+
+    #cas.security.authentication.listener:
+    #    class: L3\CasBundle\Security\CasListener
+    #    arguments: ['@security.token_storage', '@security.authentication.manager', '%cas%']
+    #    public: false
+    cas.security.authentication.authenticator:
+        class: L3\Bundle\CasGuardBundle\Security\CasAuthenticator
+        arguments: ['%cas%','@event_dispatcher']
+        public: false
