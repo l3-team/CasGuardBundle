@@ -17,10 +17,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('l3_cas_guard');
-
-        $rootNode
+        $treeBuilder = new TreeBuilder('l3_cas_guard');
+        $treeBuilder->getRootNode()
             ->children()
             ->scalarNode('host')->defaultValue(300)->end()
             ->scalarNode('path')->defaultValue('')->end()
