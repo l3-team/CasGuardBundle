@@ -17,7 +17,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Form\Exception\InvalidConfigurationException;
 
-class CasAuthenticator extends AbstractGuardAuthenticator {
+class CasAuthenticator extends AbstractAuthenticator {
     protected $config;
     
     private $eventDispatcher;
