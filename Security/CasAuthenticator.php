@@ -203,7 +203,7 @@ class CasAuthenticator extends AbstractGuardAuthenticator {
 
     public function getParameter($key) {
         if(!array_key_exists($key, $this->config)) {
-            throw new InvalidConfigurationException('l3_cas.' . $key . ' is not defined');
+            throw new InvalidConfigurationException('l3_cas_guard.' . $key . ' is not defined');
         }
         return $this->config[$key];
     }
