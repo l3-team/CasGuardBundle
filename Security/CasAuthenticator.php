@@ -3,15 +3,19 @@
 namespace L3\Bundle\CasGuardBundle\Security;
 
 use L3\Bundle\CasGuardBundle\Event\CasAuthenticationFailureEvent;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Component\Form\Exception\InvalidConfigurationException;
 
 class CasAuthenticator extends AbstractGuardAuthenticator {
     protected $config;
@@ -22,7 +26,7 @@ class CasAuthenticator extends AbstractGuardAuthenticator {
      * Process configuration
      * @param array $config
      */
-    public function __construct($config, EventDispatcherInterface $eventDispatcher) {
+    public function __construct(array $config = Array(), EventDispatcherInterface $eventDispatcher = null) {
         $this->config = $config;
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -36,14 +40,16 @@ class CasAuthenticator extends AbstractGuardAuthenticator {
      *
      * @return bool
      */
-    public function supports(Request $request) {
+    public function supports(Request $request): ?bool
+    {
         return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getCredentials(Request $request) {        
+    public function getCredentials(Request $request): Passport 
+    {
         $user = "__NO_USER__";
         
         if(!isset($_SESSION)) session_start();
@@ -130,28 +136,10 @@ class CasAuthenticator extends AbstractGuardAuthenticator {
                 //}
             } 
         }
-        
-        return $user;
-    }
 
-    /**
-     * Calls the UserProvider providing a valid User
-     * @param array $credentials
-     * @param UserProviderInterface $userProvider
-     * @return bool
-     */
-    public function getUser($credentials, UserProviderInterface $userProvider) {
-        return $userProvider->loadUserByUsername($credentials);        
-    }
+        $passport = new SelfValidatingPassport(new UserBadge($user), []);        
 
-    /**
-     * Mandatory but not in use in a remote authentication
-     * @param $credentials
-     * @param UserInterface $user
-     * @return bool
-     */
-    public function checkCredentials($credentials, UserInterface $user) {
-        return true;
+        return $passport;
     }
 
     /**
@@ -161,7 +149,8 @@ class CasAuthenticator extends AbstractGuardAuthenticator {
      * @param $providerKey
      * @return null
      */
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
+    {
         if (\phpCAS::isSessionAuthenticated()) {
             $token->setAttributes(\phpCAS::getAttributes());
         }
@@ -175,30 +164,16 @@ class CasAuthenticator extends AbstractGuardAuthenticator {
      * @param AuthenticationException $exception
      * @return Response
      */
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception) {
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
+    {
         //echo "onAuthenticationFailure<br />";
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
         $def_response = new Response($message, 403);
         
         $event = new CasAuthenticationFailureEvent($request,$exception, $def_response);
-        $this->eventDispatcher->dispatch(CasAuthenticationFailureEvent::POST_MESSAGE, $event);
+        $this->eventDispatcher->dispatch($event, CasAuthenticationFailureEvent::POST_MESSAGE);
 
         return $event->getResponse();
-    }
-
-    /**
-     * Called when authentication is needed, redirect to your CAS server authentication form
-     */
-    public function start(Request $request, AuthenticationException $authException = null) {
-        
-    }
-
-    /**
-     * Mandatory but not in use in a remote authentication
-     * @return bool
-     */
-    public function supportsRememberMe() {
-        return false;
     }
 
     public function getParameter($key) {
