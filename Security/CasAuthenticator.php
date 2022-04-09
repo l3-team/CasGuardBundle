@@ -31,6 +31,11 @@ class CasAuthenticator extends AbstractAuthenticator {
         $this->eventDispatcher = $eventDispatcher;
     }
 
+    public function supports(Request $request): ?bool
+    {
+        return true;
+    }
+
     /**
      * Does the authenticator support the given Request?
      *
@@ -40,15 +45,7 @@ class CasAuthenticator extends AbstractAuthenticator {
      *
      * @return bool
      */
-    public function supports(Request $request): ?bool
-    {
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getCredentials(Request $request): Passport 
+    public function authenticate(Request $request): Passport 
     {
         $user = "__NO_USER__";
         
