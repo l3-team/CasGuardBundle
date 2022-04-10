@@ -17,7 +17,7 @@ $ composer update
 
 Declaration of the Bundle in the Kernel of Symfony
 ---
-For Symfony2 or Symfony3, add the Bundle in app/AppKernel.php
+For Symfony3, add the Bundle in app/AppKernel.php
 
 ```
 <?php
@@ -54,7 +54,7 @@ return [
 
 Bundle Configuration
 ---
-For Symfony2 or Symfony3, add the l3_cas_guard parameters in your config file (parameters.yml and parameters.yml.dist) :
+For Symfony3, add the l3_cas_guard parameters in your config file (parameters.yml and parameters.yml.dist) :
 ```
 l3_cas_guard:
     host: cas-test.univ-lille3.fr                       # Cas Server
@@ -109,7 +109,7 @@ l3_cas_guard:
 
 Security Configuration
 ---
-For Symfony2 or Symfony3 or Symfony4 or Symfony5, configure the firewall in the security file app/config/security.yml
+For Symfony3 or Symfony4 or Symfony5, configure the firewall in the security file app/config/security.yml
 ```
 security:
     providers:
@@ -208,14 +208,14 @@ security:
 ```
 
 
-Next set force to false in app/config/parameters.yml (for Symfony2 or Symfony3) and in config/services.yaml (for Symfony4) :
+Next set force to false in app/config/parameters.yml (for Symfony3) and in config/services.yaml (for Symfony4) :
 ```
 l3_cas_guard:
     ...
     force: false                                         # Allows cas check mode and not force, user : __NO_USER__ if not connected (If force false, Single sign out cant work).
 ```
 
-And for Symfony2 or Symfony3 set **default: anonymous** in app/config/security.yml
+And for Symfony3 set **default: anonymous** in app/config/security.yml
 ```
 security:
     providers:
@@ -296,7 +296,7 @@ For Symfony 6, replace ***anonymous: true*** with ***lazy: true*** like this :
 
 
 
-For Symfony2 or Symfony3, add parameters cas_host and cas_login_target and cas_path and cas_gateway in your files app/config/parameters.yml.dist and app/config/parameters.yml under parameters (NOT under l3_cas_guard)
+For Symfony3, add parameters cas_host and cas_login_target and cas_path and cas_gateway in your files app/config/parameters.yml.dist and app/config/parameters.yml under parameters (NOT under l3_cas_guard)
 ```
 	...
         cas_login_target: https://your_web_path_application.com/
@@ -319,7 +319,7 @@ For Symfony4 and Symfony5 and Symfony6, add parameters cas_host and cas_login_ta
         ...
 ```
 
-For Symfony 2, Symfony 3 and Symfony 4, create a login route and force route in your DefaultController in your application:
+For Symfony 3 and Symfony 4, create a login route and force route in your DefaultController in your application:
 ```
 /**
  * @Route("/login", name="login")
@@ -450,7 +450,7 @@ Configuration of the Single Sign Out
 In order to use the Single Sign Out, it is recommanded to disable Symfony Sessions in Symfony (so you will use the PHP native sessions).
 
 ```
-# app/config/config.yml (for Symfony2 or Symfony3)
+# app/config/config.yml (Symfony3)
 # config/packages/framework.yaml (for Symfony4 and Symfony5 and Symfony6)
 framework:
     # ...
@@ -484,7 +484,7 @@ You can also use FOSUserBundle... like this :
 
 Logout route
 ---
-In Symfony 2 or Symfony 3, if you want use **/logout** route in order to call Logout, you can add this in your **routing.yml** :
+In Symfony 3, if you want use **/logout** route in order to call Logout, you can add this in your **routing.yml** :
 ```
 l3_logout:
     path:     /logout
