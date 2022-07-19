@@ -162,9 +162,21 @@ class CasAuthenticator extends AbstractGuardAuthenticator {
      * @return null
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
-        if (\phpCAS::isSessionAuthenticated()) {
-            $token->setAttributes(\phpCAS::getAttributes());
-        }
+        //if (\phpCAS::isSessionAuthenticated()) {
+        //    $token->setAttributes(\phpCAS::getAttributes());
+        //}
+        if (\phpCAS::isInitialized()) {
+    		$authenticated = false;                      
+    		if($this->getParameter('gateway')) {
+        		$authenticated = \phpCAS::checkAuthentication();
+    		} else {
+        		$authenticated = \phpCAS::isAuthenticated();
+    		}
+    
+    		if ($authenticated) {                
+        		$token->setAttributes(\phpCAS::getAttributes());
+    		}            
+	}
         
         return null;
     }
