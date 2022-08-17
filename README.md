@@ -522,3 +522,11 @@ You can get the additional attributes in a controller with this code :
 $attributes = $this->get('security.token_storage')->getToken()->getAttributes();
 ...
 ```
+For Symfony6 :
+
+```
+...
+$attributes = $this->container->get('security.token_storage')->getToken()->getAttributes();
+...
+```
+
