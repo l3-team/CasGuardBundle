@@ -5,7 +5,7 @@ namespace L3\Bundle\CasGuardBundle\Event;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 
 class CasAuthenticationFailureEvent extends Event {
