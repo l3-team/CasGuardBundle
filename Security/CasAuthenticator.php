@@ -181,7 +181,7 @@ class CasAuthenticator extends AbstractGuardAuthenticator {
         $def_response = new Response($message, 403);
         
         $event = new CasAuthenticationFailureEvent($request,$exception, $def_response);
-        $this->eventDispatcher->dispatch(CasAuthenticationFailureEvent::POST_MESSAGE, $event);
+        $this->eventDispatcher->dispatch($event, CasAuthenticationFailureEvent::POST_MESSAGE);
 
         return $event->getResponse();
     }
