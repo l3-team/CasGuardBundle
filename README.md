@@ -530,3 +530,9 @@ $attributes = $this->container->get('security.token_storage')->getToken()->getAt
 ...
 ```
 
+Annotations
+---
+The Route annotations run if you install this package :
+```
+composer require doctrine/annotations
+```
