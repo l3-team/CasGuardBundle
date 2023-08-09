@@ -6,18 +6,14 @@ Supports Single Sign Out (no support in BeSimpleSSoBundle).
 
 Installation
 ---
-Install the Bundle by adding this line to your composer.json :
+Install the Bundle with this command :
 ```
-"l3/cas-guard-bundle": "~1.0"
+composer require l3/cas-guard-bundle:~1.0
 ```
-Then 
- ```
-$ composer update
- ```
 
 Declaration of the Bundle in the Kernel of Symfony
 ---
-For Symfony2 or Symfony3, add the Bundle in app/AppKernel.php
+For Symfony3, add the Bundle in app/AppKernel.php
 
 ```
 <?php
@@ -41,7 +37,7 @@ class AppKernel extends Kernel
 }
 ```
 
-For Symfony4 and Symfony5, add the Bundle in config/bundles.php (if line not present)
+For Symfony4 and Symfony5 and Symfony 6, add the Bundle in config/bundles.php (if line not present)
 ```
 <?php
 
@@ -54,7 +50,7 @@ return [
 
 Bundle Configuration
 ---
-For Symfony2 or Symfony3, add the l3_cas_guard parameters in your config file (parameters.yml and parameters.yml.dist) :
+For Symfony3, add the l3_cas_guard parameters in your config file (parameters.yml and parameters.yml.dist) :
 ```
 l3_cas_guard:
     host: cas-test.univ-lille3.fr                       # Cas Server
@@ -67,7 +63,7 @@ l3_cas_guard:
     gateway: true					# Gateway mode (for use the mode gateway of the Cas Server) set to false if you use micro-services or apis rest.
 ```
 
-For Symfony4 and Symfony5, add the variables in your config file (.env and .env.dist) :
+For Symfony4 and Symfony5 and Symfony 6, add the variables in your config file (.env and .env.dist) :
 ```
 ...
 ###> l3/cas-guard-bundle ###
@@ -91,6 +87,7 @@ parameters:
     cas_login_target: '%env(string:CAS_LOGIN_TARGET)%'
     cas_logout_target: '%env(string:CAS_LOGOUT_TARGET)%'
     cas_host: '%env(string:CAS_HOST)%'
+    cas_port: '%env(int:CAS_PORT)%'
     cas_path: '%env(string:CAS_PATH)%'
     cas_gateway: '%env(bool:CAS_GATEWAY)%'
 
@@ -108,7 +105,7 @@ l3_cas_guard:
 
 Security Configuration
 ---
-For Symfony2 or Symfony3 or Symfony4 or Symfony5, configure the firewall in the security file app/config/security.yml
+For Symfony3 or Symfony4 or Symfony5, configure the firewall in the security file app/config/security.yml
 ```
 security:
     providers:
@@ -127,6 +124,26 @@ security:
                 authenticators:
                     - cas.security.authentication.authenticator
 ```
+
+For Symfony6 :
+```
+security:
+    providers:
+            # ...
+
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt|error)|css|images|js)/
+            security: false
+
+        l3_firewall:
+            pattern: ^/
+            security: true
+            custom_authenticators:
+                - cas.security.authentication.authenticator
+```
+
 
 Anonymous Configuration
 ---
@@ -187,14 +204,14 @@ security:
 ```
 
 
-Next set force to false in app/config/parameters.yml (for Symfony2 or Symfony3) and in config/services.yaml (for Symfony4) :
+Next set force to false in app/config/parameters.yml (for Symfony3) and in config/services.yaml (for Symfony4) :
 ```
 l3_cas_guard:
     ...
     force: false                                         # Allows cas check mode and not force, user : __NO_USER__ if not connected (If force false, Single sign out cant work).
 ```
 
-And for Symfony2 or Symfony3 set **default: anonymous** in app/config/security.yml
+And for Symfony3 set **default: anonymous** in app/config/security.yml
 ```
 security:
     providers:
@@ -262,9 +279,20 @@ For Symfony 5, replace ***anonymous: true*** with ***lazy: true*** like this :
 
 ```
 
+For Symfony 6, replace ***anonymous: true*** with ***lazy: true*** like this :
+```
+        main:
+            pattern: ^/
+            security: true
+            lazy: true
+            provider: chain_provider
+            custom_authenticators:
+                - cas.security.authentication.authenticator
+```
 
 
-For Symfony2 or Symfony3, add parameters cas_host and cas_login_target and cas_path and cas_gateway in your files app/config/parameters.yml.dist and app/config/parameters.yml under parameters (NOT under l3_cas_guard)
+
+For Symfony3, add parameters cas_host and cas_login_target and cas_path and cas_gateway in your files app/config/parameters.yml.dist and app/config/parameters.yml under parameters (NOT under l3_cas_guard)
 ```
 	...
         cas_login_target: https://your_web_path_application.com/
@@ -275,18 +303,19 @@ For Symfony2 or Symfony3, add parameters cas_host and cas_login_target and cas_p
 	...
 ```
 
-For Symfony4 and Symfony5, add parameters cas_host and cas_login_target in your config/services.yaml under parameters (NOT under l3_cas_guard)
+For Symfony4 and Symfony5 and Symfony6, add parameters cas_host and cas_login_target in your config/services.yaml under parameters (NOT under l3_cas_guard)
 ```
         ...
         cas_login_target: '%env(string:CAS_LOGIN_TARGET)%'
         cas_logout_target: '%env(string:CAS_LOGIN_TARGET)%'
         cas_host: '%env(string:CAS_HOST)%'
+        cas_port: '%env(int:CAS_PORT)%'
         cas_path: '%env(string:CAS_PATH)%'
         cas_gateway: '%env(bool:CAS_GATEWAY)%'
         ...
 ```
 
-For Symfony 2, Symfony 3 and Symfony 4, create a login route and force route in your DefaultController in your application:
+For Symfony 3 and Symfony 4, create a login route and force route in your DefaultController in your application:
 ```
 /**
  * @Route("/login", name="login")
@@ -345,6 +374,71 @@ For Symfony 5, create a login route and force route in your DefaultController in
     }
 ``` 
 
+For Symfony 6, create this Controller ***src/Controller/DefaultController.php*** :
+```
+<?php
+
+namespace App\Controller;
+
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class DefaultController extends AbstractController
+{
+    /**
+     * @Route("/login", name="login")
+     */
+    public function login(Request $request) {
+           $target = urlencode($this->getParameter('cas_login_target'));
+           $url = 'https://'.$this->getParameter('cas_host') . ((($this->getParameter('cas_port')!=80) || ($this->getParameter('cas_port')!=443)) ? ":".$this->getParameter('cas_port') : "") . $this->getParameter('cas_path') . '/login?service=';
+           return $this->redirect($url . $target . '/force');
+    }
+    
+    /**
+     * @Route("/logout", name="logout")
+     */
+    public function logout(Request $request) {
+        if (($this->getParameter('cas_logout_target') !== null) && (!empty($this->getParameter('cas_logout_target')))) {
+            \phpCAS::logoutWithRedirectService($this->getParameter('cas_logout_target'));
+        } else {
+            \phpCAS::logout();
+        }
+    }
+    
+    /**
+     * @Route("/force", name="force")
+     */
+    public function force(Request $request) {
+
+            if ($this->getParameter("cas_gateway")) {
+                if (!isset($_SESSION)) {
+                        session_start();
+                }
+
+                session_destroy();
+            }
+
+            return $this->redirect($this->generateUrl('index'));
+    }
+    
+    
+    /**
+     * @Route("/", name="index")
+     */
+    public function index(Request $request) : Response
+    {
+        dump($this->container->get('security.token_storage'));
+        dump($this->getUser());
+        
+        return $this->render('base.html.twig', []);
+    }
+}
+
+```
+
+
 Finally you can use the route /login in order to call the cas login page and redirect to your application, then you become connected :)
 
 Configuration of the Single Sign Out
@@ -352,8 +446,8 @@ Configuration of the Single Sign Out
 In order to use the Single Sign Out, it is recommanded to disable Symfony Sessions in Symfony (so you will use the PHP native sessions).
 
 ```
-# app/config/config.yml (for Symfony2 or Symfony3)
-# config/packages/framework.yaml (for Symfony4 and Symfony5)
+# app/config/config.yml (Symfony3)
+# config/packages/framework.yaml (for Symfony4 and Symfony5 and Symfony6)
 framework:
     # ...
     session:
@@ -386,7 +480,7 @@ You can also use FOSUserBundle... like this :
 
 Logout route
 ---
-In Symfony 2 or Symfony 3, if you want use **/logout** route in order to call Logout, you can add this in your **routing.yml** :
+In Symfony 3, if you want use **/logout** route in order to call Logout, you can add this in your **routing.yml** :
 ```
 l3_logout:
     path:     /logout
@@ -400,18 +494,69 @@ logout:
     controller: L3\Bundle\CasBundle\Controller\LogoutController::logoutAction
 ```
 
-In Symfony 5, you must create a logout route in your DefaultController in your application:
+In Symfony 5 or Symfony6, you must create a logout route in your DefaultController in your application:
 ```
     /**
      * @Route("/logout", name="logout")
      */
     public function logoutAction() {
         if (($this->getParameter('cas_logout_target') !== null) && (!empty($this->getParameter('cas_logout_target')))) {
+            \phpCAS::client(CAS_VERSION_2_0, $this->getParameter('host'), $this->getParameter('port'), is_null($this->getParameter('path')) ? '' : $this->getParameter('path'), true);
             \phpCAS::logoutWithRedirectService($this->getParameter('cas_logout_target'));
+        } else {
+            \phpCAS::client(CAS_VERSION_2_0, $this->getParameter('host'), $this->getParameter('port'), is_null($this->getParameter('path')) ? '' : $this->getParameter('path'), true);
+            \phpCAS::logout();
+        }
+    }
+```
+
+Logout handler
+---
+In somes applications like EasyAdminBundle, you can need use a logout success handler in order to the call /logout by EasyAdmin use this logout success handler.
+- create src/Handler/AuthenticationHandler.php with this code :
+```
+<?php
+
+namespace App\Handler;
+
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface;
+
+class AuthenticationHandler implements LogoutSuccessHandlerInterface
+{
+    protected $cas_logout_target;
+
+    public function __construct($cas_logout_target)
+    {
+        $this->cas_logout_target = $cas_logout_target;
+    }
+
+    public function onLogoutSuccess(Request $request) : Response
+    {
+        if(!empty($this->cas_logout_target)) {
+            \phpCAS::logoutWithRedirectService($this->cas_logout_target);
         } else {
             \phpCAS::logout();
         }
     }
+}
+```
+- in config/services.yaml add this line under "services:"
+```
+     authentication_handler:
+         class: App\Handler\AuthenticationHandler
+         arguments: ['%cas_logout_target%']
+         public: false
+```
+- in config/packages/security.yaml add this lines (for firewalls under cas: true)
+```
+             logout:
+                 path: /logout
+                 success_handler: authentication_handler
+                 invalidate_session: false
 ```
 
 Additional Attributes
@@ -423,4 +568,18 @@ You can get the additional attributes in a controller with this code :
 ...
 $attributes = $this->get('security.token_storage')->getToken()->getAttributes();
 ...
+```
+For Symfony6 :
+
+```
+...
+$attributes = $this->container->get('security.token_storage')->getToken()->getAttributes();
+...
+```
+
+Annotations
+---
+The Route annotations run if you install this package :
+```
+composer require doctrine/annotations
 ```
