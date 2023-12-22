@@ -37,7 +37,7 @@ class AppKernel extends Kernel
 }
 ```
 
-For Symfony4 and Symfony5 and Symfony 6, add the Bundle in config/bundles.php (if line not present)
+For Symfony4 and Symfony5 and Symfony6 and Symfony7, add the Bundle in config/bundles.php (if line not present)
 ```
 <?php
 
@@ -63,7 +63,7 @@ l3_cas_guard:
     gateway: true					# Gateway mode (for use the mode gateway of the Cas Server) set to false if you use micro-services or apis rest.
 ```
 
-For Symfony4 and Symfony5 and Symfony 6, add the variables in your config file (.env and .env.dist) :
+For Symfony4 and Symfony5 and Symfony6 and Symfony7, add the variables in your config file (.env and .env.dist) :
 ```
 ...
 ###> l3/cas-guard-bundle ###
@@ -125,7 +125,7 @@ security:
                     - cas.security.authentication.authenticator
 ```
 
-For Symfony6 :
+For Symfony6 and Symfony7 :
 ```
 security:
     providers:
@@ -279,7 +279,7 @@ For Symfony 5, replace ***anonymous: true*** with ***lazy: true*** like this :
 
 ```
 
-For Symfony 6, replace ***anonymous: true*** with ***lazy: true*** like this :
+For Symfony 6 and Symfony7, replace ***anonymous: true*** with ***lazy: true*** like this :
 ```
         main:
             pattern: ^/
@@ -303,7 +303,7 @@ For Symfony3, add parameters cas_host and cas_login_target and cas_path and cas_
 	...
 ```
 
-For Symfony4 and Symfony5 and Symfony6, add parameters cas_host and cas_login_target in your config/services.yaml under parameters (NOT under l3_cas_guard)
+For Symfony4 and Symfony5 and Symfony6 and Symfony7, add parameters cas_host and cas_login_target in your config/services.yaml under parameters (NOT under l3_cas_guard)
 ```
         ...
         cas_login_target: '%env(string:CAS_LOGIN_TARGET)%'
@@ -374,7 +374,7 @@ For Symfony 5, create a login route and force route in your DefaultController in
     }
 ``` 
 
-For Symfony 6, create this Controller ***src/Controller/DefaultController.php*** :
+For Symfony 6 and Symfony7, create this Controller ***src/Controller/DefaultController.php*** :
 ```
 <?php
 
@@ -494,7 +494,7 @@ logout:
     controller: L3\Bundle\CasBundle\Controller\LogoutController::logoutAction
 ```
 
-In Symfony 5 or Symfony6, you must create a logout route in your DefaultController in your application:
+In Symfony 5 or Symfony6 or Symfony7, you must create a logout route in your DefaultController in your application:
 ```
     /**
      * @Route("/logout", name="logout")
