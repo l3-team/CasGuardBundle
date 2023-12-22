@@ -63,7 +63,7 @@ l3_cas_guard:
     gateway: true					# Gateway mode (for use the mode gateway of the Cas Server) set to false if you use micro-services or apis rest.
 ```
 
-For Symfony4 and Symfony5 and Symfony6 and Symfony7, add the variables in your config file (.env and .env.dist) :
+For Symfony4 and Symfony5 and Symfony6, add the variables in your config file (.env and .env.dist) :
 ```
 ...
 ###> l3/cas-guard-bundle ###
@@ -102,6 +102,48 @@ l3_cas_guard:
     gateway: '%env(bool:CAS_GATEWAY)%'
 ...
 ```
+
+For Symfony7, add the variables in your config file (.env and .env.dist) :
+```
+...
+###> l3/cas-guard-bundle ###
+CAS_HOST=cas-test.univ-lille3.fr     # Cas Server
+CAS_PATH=~                           # App path if not in root (eg. cas.test.com/cas)
+CAS_PORT=443                         # Server port
+CAS_CA=false                         # SSL Certificate
+CAS_HANDLE_LOGOUT_REQUEST=true       # Single sign out activation (default: false)
+CAS_LOGIN_TARGET=https://server.univ-lille3.fr # Redirect path after login (when use anonymous mode)
+CAS_LOGOUT_TARGET=https://ent-test.univ-lille3.fr    # Redirect path after logout
+CAS_FORCE=true                       # Allows cas check mode and not force, user : __NO_USER__ if not connected (If force false, Single sign out cant work).
+CAS_GATEWAY=true                     # Gateway mode (for use the mode gateway of the Cas Server) set to false if you use micro-services or apis rest.
+###< l3/cas-guard-bundle ###
+...
+```
+
+And add the parameters in your config/services.yml file (under parameters) :
+```
+...
+parameters:
+    cas_login_target: '%env(string:CAS_LOGIN_TARGET)%'
+    cas_logout_target: '%env(string:CAS_LOGOUT_TARGET)%'
+    cas_host: '%env(string:CAS_HOST)%'
+    cas_port: '%env(int:CAS_PORT)%'
+    cas_path: '%env(string:CAS_PATH)%'
+    cas_gateway: '%env(bool:CAS_GATEWAY)%'
+
+l3_cas_guard:
+    host: '%env(string:CAS_HOST)%'
+    path: '%env(string:CAS_PATH)%'
+    port: '%env(int:CAS_PORT)%'
+    ca: '%env(bool:CAS_CA)%'
+    handleLogoutRequest: '%env(bool:CAS_HANDLE_LOGOUT_REQUEST)%'
+    casLoginTarget: '%env(string:CAS_LOGIN_TARGET)%'
+    casLogoutTarget: '%env(string:CAS_LOGOUT_TARGET)%'
+    force: '%env(bool:CAS_FORCE)%'
+    gateway: '%env(bool:CAS_GATEWAY)%'
+...
+```
+
 
 Security Configuration
 ---

@@ -26,6 +26,7 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('port')->defaultValue(443)->end()
             ->scalarNode('ca')->defaultNull()->end()
             ->booleanNode('handleLogoutRequest')->defaultValue(false)->end()
+            ->scalarNode('casLoginTarget')->defaultNull()->end()
             ->scalarNode('casLogoutTarget')->defaultNull()->end()
             ->booleanNode('force')->defaultValue(true)->end()
             ->booleanNode('gateway')->defaultValue(true)->end()
