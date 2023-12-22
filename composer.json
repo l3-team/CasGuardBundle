@@ -1,7 +1,7 @@
 {
     "name": "l3/cas-guard-bundle",
     "type": "symfony-bundle",
-    "description": "PHPCas wrapper for Symfony3, Symfony4, Symfony5, Symfony6",
+    "description": "PHPCas wrapper for Symfony3, Symfony4, Symfony5, Symfony6, Symfony7",
     "homepage": "https://github.com/l3-team/CasGuardBundle",
     "license": "LGPL-3.0-or-later",
     "authors": [
@@ -11,10 +11,10 @@
         }
     ],
     "require": {
-        "php": ">=8.0.2",
-        "apereo/phpcas": "1.3.8",
-        "symfony/security-bundle": "~6.0",
-        "symfony/framework-bundle": "~6.0"
+        "php": ">=8.2",
+        "apereo/phpcas": "1.6.1",
+        "symfony/security-bundle": "~7.0",
+        "symfony/framework-bundle": "~7.0"
     },
     "autoload": {
         "psr-4": { "L3\\Bundle\\CasGuardBundle\\": "" }
