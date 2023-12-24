@@ -417,7 +417,7 @@ For Symfony 5, create a login route and force route in your DefaultController in
     }
 ``` 
 
-For Symfony 6 and Symfony7, create this Controller ***src/Controller/DefaultController.php*** :
+For Symfony 6, create this Controller ***src/Controller/DefaultController.php*** :
 ```
 <?php
 
@@ -434,9 +434,9 @@ class DefaultController extends AbstractController
      * @Route("/login", name="login")
      */
     public function login(Request $request) {
-           $target = urlencode($this->getParameter('cas_login_target'));
+           $target = urlencode($this->getParameter('cas_login_target').'/force');
            $url = 'https://'.$this->getParameter('cas_host') . ((($this->getParameter('cas_port')!=80) || ($this->getParameter('cas_port')!=443)) ? ":".$this->getParameter('cas_port') : "") . $this->getParameter('cas_path') . '/login?service=';
-           return $this->redirect($url . $target . '/force');
+           return $this->redirect($url . $target);
     }
     
     /**
@@ -480,6 +480,65 @@ class DefaultController extends AbstractController
 }
 
 ```
+
+For Symfony 7, create this Controller ***src/Controller/DefaultController.php*** :
+```
+<?php
+
+namespace App\Controller;
+
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class DefaultController extends AbstractController
+{
+    #[Route('/login', name:'login', methods: ['GET'])]
+    public function login(Request $request) {
+           $target = urlencode($this->getParameter('cas_login_target').'/force');
+           $url = 'https://'.$this->getParameter('cas_host') . ((($this->getParameter('cas_port')!=80) || ($this->getParameter('cas_port')!=443)) ? ":".$this->getParameter('cas_port') : "") . $this->getParameter('cas_path') . '/login?service=';
+
+           return $this->redirect($url . $target);
+    }
+    
+    #[Route('/logout', name:'logout', methods: ['GET'])]
+    public function logout(Request $request) {
+        if (($this->getParameter('cas_logout_target') !== null) && (!empty($this->getParameter('cas_logout_target')))) {
+            \phpCAS::logoutWithRedirectService($this->getParameter('cas_logout_target'));
+        } else {
+            \phpCAS::logout();
+        }
+    }
+    
+    #[Route('/force', name:'force', methods: ['GET'])]
+    public function force(Request $request) {
+
+            if ($this->getParameter("cas_gateway")) {
+                if (!isset($_SESSION)) {
+                        session_start();
+                }
+
+                session_destroy();
+            }
+
+            return $this->redirect($this->generateUrl('index'));
+    }
+    
+    
+    #[Route('/', name:'index', methods: ['GET'])]
+    public function index(Request $request) : Response
+    {
+        dump($this->container->get('security.token_storage'));
+        dump($this->getUser());
+        
+        return $this->render('base.html.twig', []);
+    }
+}
+
+```
+
+
 
 
 Finally you can use the route /login in order to call the cas login page and redirect to your application, then you become connected :)
