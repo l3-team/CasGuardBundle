@@ -54,7 +54,7 @@ class CasAuthenticator extends AbstractAuthenticator {
 	\phpCAS::setLogger();
 	\phpCAS::setVerbose(false);
 
-        \phpCAS::client(CAS_VERSION_2_0, $this->getParameter('host'), $this->getParameter('port'), is_null($this->getParameter('path')) ? '' : $this->getParameter('path'), $this->getParameter('casLoginTarget'), true);
+        \phpCAS::client(CAS_VERSION_2_0, $this->getParameter('host'), $this->getParameter('port'), is_null($this->getParameter('path')) ? '' : $this->getParameter('path'), $this->getParameter('casServiceBaseUrl'), true);
 
         if(is_bool($this->getParameter('ca')) && $this->getParameter('ca') == false) {
             \phpCAS::setNoCasServerValidation();

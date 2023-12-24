@@ -112,6 +112,7 @@ CAS_PATH=~                           # App path if not in root (eg. cas.test.com
 CAS_PORT=443                         # Server port
 CAS_CA=false                         # SSL Certificate
 CAS_HANDLE_LOGOUT_REQUEST=true       # Single sign out activation (default: false)
+CAS_SERVICE_BASE_URL=https://server.univ-lille3.fr # Service base URL how authorized to consume server cas
 CAS_LOGIN_TARGET=https://server.univ-lille3.fr # Redirect path after login (when use anonymous mode)
 CAS_LOGOUT_TARGET=https://ent-test.univ-lille3.fr    # Redirect path after logout
 CAS_FORCE=true                       # Allows cas check mode and not force, user : __NO_USER__ if not connected (If force false, Single sign out cant work).
@@ -137,7 +138,7 @@ l3_cas_guard:
     port: '%env(int:CAS_PORT)%'
     ca: '%env(bool:CAS_CA)%'
     handleLogoutRequest: '%env(bool:CAS_HANDLE_LOGOUT_REQUEST)%'
-    casLoginTarget: '%env(string:CAS_LOGIN_TARGET)%'
+    casServiceBaseUrl: '%env(string:CAS_SERVICE_BASE_URL)%'
     casLogoutTarget: '%env(string:CAS_LOGOUT_TARGET)%'
     force: '%env(bool:CAS_FORCE)%'
     gateway: '%env(bool:CAS_GATEWAY)%'
