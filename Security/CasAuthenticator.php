@@ -33,6 +33,11 @@ class CasAuthenticator extends AbstractAuthenticator {
 
     public function supports(Request $request): ?bool
     {
+	$session = $request->getSession();
+        
+        if ($session->has('impersonate_token')) {
+            return false;
+        }
         return true;
     }
 
