@@ -10,5 +10,14 @@ services:
     #    public: false
     cas.security.authentication.authenticator:
         class: L3\Bundle\CasGuardBundle\Security\CasAuthenticator
-        arguments: ['%cas%','@event_dispatcher']
+        arguments: ['%cas%','@event_dispatcher',"@cas.security.authentication.attrStorage"]
         public: false
+
+    cas.security.authentication.attrStorage:
+        class: L3\Bundle\CasGuardBundle\Security\CasAttributeStorage
+
+    cas.security.authentication.provider:
+        class: L3\Bundle\CasGuardBundle\Security\CasUserProvider
+        arguments: ["@cas.security.authentication.attrStorage"]
+        public: true
+    

@@ -751,6 +751,97 @@ class MyUserEntity implements CasUserInterface
 ...
 ``````
 
+Finally, you can work with a custom UserProvider (that extends, or not, CasUserProvider), to create users from cas attributes only (and skip useless ldap extra queries), like this exemple :
+```
+<?php
+
+namespace App\Security;
+
+use App\Entity\User;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use L3\Bundle\CasGuardBundle\Entity\CasUserInterface;
+use L3\Bundle\CasGuardBundle\Security\CasAttributeStorage;
+use L3\Bundle\CasGuardBundle\Security\CasUserProvider;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+class CustomUserProvider extends CasUserProvider
+{
+    public function __construct(private CasAttributeStorage $casAttributeStorage, private UserRepository $userRepository, private EntityManagerInterface $entityManagerInterface)
+    {
+        parent::__construct($casAttributeStorage);
+    }
+    public function loadUserByIdentifier(string $identifier): UserInterface
+    {
+        $attributes = $this->casAttributeStorage->getAttributes();
+
+        // try to get user from db
+        $user = $this->userRepository->findOneBy(['username' => $identifier]);
+        // if not found, create a inactive user
+        if (is_null($user)) {
+            $user = new User();
+            $user
+                ->setUsername($identifier)
+                ->setEnabled(0);
+        }
+        if ($user instanceof CasUserInterface) {
+            $user->setCasAttributes($attributes);
+        }
+        $this->computeRoles($user);
+
+        $this->entityManagerInterface->persist($user);
+        $this->entityManagerInterface->flush();
+
+        if (is_null($user)) {
+            throw new UserNotFoundException('Utilisateur introuvable ou desactivé !');
+        }
+
+        return $user;
+    }
+
+    private function computeRoles(User $user)
+    {
+        $attributes = $user->getAttributs();
+        $roles = ['ROLE_USER'];
+        if (isset($attributes['memberof']) && in_array('ADMIN', $attributes['memberof'])) {
+            $roles[] = 'ROLE_ADMIN';
+        }
+        if ($user->getUserIdentifier() == 'darkvador') {
+            $roles[] = 'ROLE_ADMIN';
+        }
+        $user->setRoles($roles);
+    }
+
+    /**
+     * Refreshes the user after being reloaded from the session.
+     *
+     * @return UserInterface
+     */
+    public function refreshUser(UserInterface $user): UserInterface
+    {
+        $user = $this->userRepository->find($user->getUserIdentifier());
+
+        if (is_null($user) || !$user->isEnabled()) {
+            throw new UserNotFoundException('Utilisateur introuvable ou desactivé !');
+        }
+
+        $this->computeRoles($user);
+
+        return $user;
+    }
+
+    public function supportsClass(string $class): bool
+    {
+        return is_subclass_of($class, UserInterface::class) || is_subclass_of($class, CasUserInterface::class);
+    }
+}
+
+```
+
+
 Annotations
 ---
 The Route annotations run if you install this package :

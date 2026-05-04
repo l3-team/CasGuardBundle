@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\User\UserInterface;
+use L3\Bundle\CasGuardBundle\Security\CasAttributeStorage;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -28,7 +29,7 @@ class CasAuthenticator extends AbstractAuthenticator {
      * Process configuration
      * @param array $config
      */
-    public function __construct(array $config = Array(), EventDispatcherInterface $eventDispatcher = null) {
+    public function __construct(array $config = Array(), EventDispatcherInterface $eventDispatcher = null, private CasAttributeStorage $casAttributeStorage ) {
         $this->config = $config;
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -142,6 +143,10 @@ class CasAuthenticator extends AbstractAuthenticator {
             } 
         }
 
+        // save attributes to get them in UserProvider
+        $attributes = \phpCAS::getAttributes();
+        $this->casAttributeStorage->setAttributes($attributes);
+		
         $passport = new SelfValidatingPassport(new UserBadge($user), []);        
 
         return $passport;
